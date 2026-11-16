@@ -3,8 +3,9 @@ const fs=require('fs');
 (async()=>{
  const [mode,a,b,outdir]=process.argv.slice(2);
  const browser=await chromium.launch();
- const page=await browser.newPage({viewport:{width:1280,height:720},deviceScaleFactor:1});
- await page.goto('http://127.0.0.1:8765/anim.html');
+ const page=await browser.newPage({viewport:{width:+(process.env.VW||1280),height:+(process.env.VH||720)},deviceScaleFactor:1});
+ await page.goto('http://127.0.0.1:8765/'+(process.env.PAGE||'anim.html'));
+ page.on('pageerror',e=>console.log('ERR',e.message));
  await page.evaluate(()=>window.ready);
  fs.mkdirSync(outdir,{recursive:true});
  if(mode==='preview'){

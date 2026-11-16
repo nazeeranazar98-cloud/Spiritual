@@ -33,7 +33,8 @@ while t0<T:
     add(tan,t0,tanpura_pluck(cyc[i%4]),0.06); t0+=1.05; i+=1
 
 # ---- flute ----
-def flute(notes,start,beat,octv=1,gain=1.0,buf=None,brightness=0.25):
+VOICE=[]
+def flute(notes,start,beat,octv=1,gain=1.0,buf=None,brightness=0.25,rec=True):
     buf=mix if buf is None else buf
     t=start; prev=None
     for semi,b in notes:
@@ -49,6 +50,7 @@ def flute(notes,start,beat,octv=1,gain=1.0,buf=None,brightness=0.25):
         s+=0.04*rng.standard_normal(n)*np.minimum(1,tt/0.05)
         e=env_adsr(n,0.06,0.18)*(0.85+0.15*np.sin(np.pi*np.minimum(1,tt/d)))
         add(buf,t,s*e,0.11*gain); add(rev_send,t,s*e,0.06*gain)
+        if rec: VOICE.append((round(t,3),round(d,3),semi))
         prev=tgt; t+=d
     return t
 
@@ -179,4 +181,6 @@ st/=np.max(np.abs(st))*1.12
 st=np.tanh(st*1.1)
 with wave.open('music.wav','wb') as w:
     w.setnchannels(2);w.setsampwidth(2);w.setframerate(SR);w.writeframes((st*32767).astype(np.int16).tobytes())
-print('done',st.shape)
+import json
+open('notes.js','w').write('window.NOTES='+json.dumps(sorted(VOICE))+';')
+print('done',st.shape,len(VOICE))
